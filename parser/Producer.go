@@ -25,7 +25,10 @@ func (receiver *ObjMapper) Producer(bucket string, key string, urls chan string,
 
 	for url := range urls {
 		l := make(map[string]interface{})
-		json.Unmarshal([]byte(ReviewsJson(url)), &l)
+		paginate := json.Unmarshal([]byte(ReviewsJson(url)), &l)
+		if (paginate != nil) {
+			log.Error.Println("empty count", paginate)
+		}
 
 		/*adds a +20 in the loop URL to get the last reviews if the loop count doesn't end in an even number*/
 		loopcount, _ := strconv.Atoi(fmt.Sprintf("%v", l["aggregateRating"].(map[string]interface{})["reviewCount"]))
@@ -39,7 +42,10 @@ func (receiver *ObjMapper) Producer(bucket string, key string, urls chan string,
 			}
 
 			log.Info.Println("url", concaturl)
-			json.Unmarshal([]byte(ReviewsJson(concaturl)), &baseMap.Yelp)
+			payload :=json.Unmarshal([]byte(ReviewsJson(concaturl)), &baseMap.Yelp)
+			if (payload != nil) {
+				log.Error.Println("Yelp payload error", payload)
+			}
 			yelpReview := json.JSONtoMapYelp(&baseMap.Yelp)
 
 			receiver.WG.Add(1)
