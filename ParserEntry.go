@@ -29,24 +29,22 @@ func main() {
 	//var stringBuilder strings.Builder
 	var WG sync.WaitGroup
 	s3Bucket := "poly-testing"
-	key := "yelp/urls/yelp_urls.txt"
+	key := "yelp"
+	sourceUrls := "yelp/urls/yelp_urls.txt"
 	yelpUrls := make(chan string)
 	yelpChan := make(chan map[string]string)
 	baseMap := make(map[string]interface{})
 
-	/* "2006-01-02" is the standard time format for go lang YYYY-MM-DD*/
-	objectKey := key + "/reviews/" + time.Now().Format("2006-01-02") + "/" + time.Now().Format("2006-01-02") + "-" + uuid.NewV4().String() + ".gz"
 	producer := parser.ObjMapper{
 		Yelp:        baseMap,
 		WG:          WG,
 		Urls:        yelpUrls,
 		YelpChanMap: yelpChan}
 
-	go producer.Producer(s3Bucket, key)
+	go producer.Producer(s3Bucket, sourceUrls)
 
 	for yMap := range yelpChan {
-		goutils.Info.Println(yMap)
-		for k,v := range yMap {
+		for k, v := range yMap {
 			keyArray := strings.Split(k, ":")
 			stringFormat := fmt.Sprintf("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"%s",
 				strings.ReplaceAll(keyArray[0], "\n", " "),
@@ -57,6 +55,8 @@ func main() {
 				v, "\n")
 			stringBuilder.WriteString(stringFormat)
 		}
+		/* "2006-01-02" is the standard time format for go lang YYYY-MM-DD*/
+		objectKey := key + "/reviews/" + time.Now().Format("2006-01-02") + "/" + uuid.NewV4().String() + "/" + time.Now().Format("2006-01-02") + "-" + uuid.NewV4().String() + ".gz"
 		/*writes payload to s3*/
 		goaws.S3Obj{Bucket: s3Bucket, Key: objectKey}.S3WriteGzip(stringBuilder.String(), goaws.SessionGenerator())
 	}
