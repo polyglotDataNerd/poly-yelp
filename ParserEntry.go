@@ -30,7 +30,7 @@ func main() {
 	var WG sync.WaitGroup
 	s3Bucket := "poly-testing"
 	key := "yelp"
-	sourceUrls := "yelp/urls/yelp_urls.txt"
+	sourceUrls := "yelp/urls"
 	yelpUrls := make(chan string)
 	yelpChan := make(chan map[string]string)
 	baseMap := make(map[string]interface{})
