@@ -5,14 +5,14 @@ package parser
 import (
 	"bytes"
 	"fmt"
+	Set "github.com/deckarep/golang-set"
 	goutils "github.com/polyglotDataNerd/poly-Go-utils/utils"
 	"golang.org/x/net/html"
-	"math"
-	"strings"
-	Set "github.com/deckarep/golang-set"
 	"io"
 	"io/ioutil"
+	"math"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -47,7 +47,7 @@ func PayloadRequest(url string) http.Response {
 	/*stopwatch start*/
 	startTime := time.Now()
 	client := &http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: 30 * time.Second,
 	}
 
 	request, err := http.NewRequest("GET", url, nil)
@@ -211,15 +211,5 @@ func renderNode(n []*html.Node) string {
 		html.Render(w, s)
 	}
 	return buf.String()
-
-}
-
-func PayloadRequestTextFile(filepath string) string {
-
-	d, err := ioutil.ReadFile(filepath)
-	if err != nil {
-		panic("File Error")
-	}
-	return string(d)
 
 }

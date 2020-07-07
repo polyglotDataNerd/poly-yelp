@@ -9,10 +9,11 @@ import (
 	"time"
 )
 
-func JSONtoMapYelp(data map[string]interface{}) (transform map[string]string) {
+func JSONtoMapYelp(data map[string]interface{}) map[string]string {
 
 	/*stopwatch start*/
 	startTime := time.Now()
+	transform := make(map[string]string)
 	var keybuilder strings.Builder
 	/*get type of reviews payload
 	log.Println("var kind:", reflect.TypeOf(data["review"]).Kind())
