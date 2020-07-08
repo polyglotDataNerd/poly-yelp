@@ -68,7 +68,7 @@ func main() {
 
 	/*for cloudwatch*/
 	cloudwatch := goaws.CloudWatch{
-		LogGroup:  "yelp-parser",
+		LogGroup:  "poly-yelp",
 		Retention: 1,
 	}
 	logs := cloudwatch.CloudWatchPut()

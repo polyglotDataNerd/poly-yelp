@@ -125,3 +125,4 @@ fabric.properties
 *config.json
 *.html
 *.config
+*infrastructure/*

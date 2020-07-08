@@ -1,4 +1,4 @@
-# yelp-parser
+# poly-yelp
 
 This project is a web go scraper for reviews specifically for Yelp to get reviews for each subject and reviews. This scraper is written in GO to utilize it's robust and easy to use concurrency/parellel framework. 
 
