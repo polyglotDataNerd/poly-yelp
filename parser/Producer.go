@@ -68,6 +68,9 @@ func (receiver *ObjMapper) Producer(bucket string, key string) {
 				}(loopcount)
 			}
 			receiver.WG.Wait()
+		} else {
+			break
 		}
+
 	}
 }
