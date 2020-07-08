@@ -6,7 +6,6 @@ import (
 	goutils "github.com/polyglotDataNerd/poly-Go-utils/utils"
 	"github.com/polyglotDataNerd/poly-yelp/parser"
 	uuid "github.com/satori/go.uuid"
-	"io/ioutil"
 	"math"
 	"runtime"
 	"strings"
@@ -62,18 +61,17 @@ func main() {
 	/*writes payload to s3*/
 	goaws.S3Obj{Bucket: s3Bucket, Key: objectKey}.S3WriteGzip(stringBuilder.String(), goaws.SessionGenerator())
 
-	/*reading log file as body*/
+	/* cloudwatch: reading log file as body
 	file, _ := ioutil.ReadFile("/var/tmp/utils.log")
 	output := string(file)
 
-	/*for cloudwatch*/
 	cloudwatch := goaws.CloudWatch{
 		LogGroup:  "poly-yelp",
 		Retention: 1,
 	}
 	logs := cloudwatch.CloudWatchPut()
 	defer logs.Close()
-	logs.Log(time.Now(), output)
+	logs.Log(time.Now(), output) */
 
 	/*stop watch end*/
 	endTimme := math.Round(time.Since(startTime).Seconds())
