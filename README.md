@@ -7,7 +7,7 @@ The parser looks for an object in S3 that has a list of URLS from yelp and will 
 Dependencies:
 
 * [GoLang](https://golang.org/)
-* [sg.com/yelp/goaws GoLang SDK](https://sg.com/yelp/goaws.amazon.com/sdk-for-go/)
+* [GoLang SDK for AWS](https://sg.com/yelp/goaws.amazon.com/sdk-for-go/)
 * [Terraform](https://learn.hashicorp.com/terraform/getting-started/install.html)
 * [Yelp](https://www.yelp.com/)
 
