@@ -11,9 +11,9 @@ import (
 )
 
 type ObjMapper struct {
-	Yelp map[string]interface{}
-	WG sync.WaitGroup
-	Urls chan string
+	Yelp        map[string]interface{}
+	WG          sync.WaitGroup
+	Urls        chan string
 	YelpChanMap chan map[string]string
 }
 
@@ -24,10 +24,12 @@ func (receiver *ObjMapper) Producer(bucket string, key string) {
 	go scanner.ProcessDir(receiver.Urls, bucket, key, "flat")
 	log.Info.Println("start line scan")
 
+	/* Yelp URLS channel coming from an s3 bucket list of YELP urls */
 	for url := range receiver.Urls {
+		log.Info.Println("main url", url)
 		l := make(map[string]interface{})
 		paginate := json.Unmarshal([]byte(ReviewsJson(url)), &l)
-		if (paginate != nil) {
+		if paginate != nil {
 			log.Error.Println("empty count", paginate)
 		}
 
@@ -37,24 +39,23 @@ func (receiver *ObjMapper) Producer(bucket string, key string) {
 
 			/*Itoa turns int to primitive string and concats the pagenumer for the base url*/
 			concaturl := fmt.Sprintf("%s%s%s", url, strconv.Itoa(i), "&sort_by=date_asc")
-			log.Info.Println(concaturl)
 			/*for yelp reviews that only have one page*/
 			if loopcount < 40 {
 				concaturl = url
 			}
 
-			log.Info.Println("url", concaturl)
-			payload :=json.Unmarshal([]byte(ReviewsJson(concaturl)), &receiver.Yelp)
-			if (payload != nil) {
-				log.Error.Println("Yelp payload error", payload)
-			}
-			yelpReview := jsonYelp.JSONtoMapYelp(receiver.Yelp)
-
+			/* runs the parser in parallel using Waitgroup on the go routines passing it to another channel */
 			receiver.WG.Add(1)
-			go func(input map[string]string) {
+			go func(loop int) {
+				log.Info.Println("url", concaturl)
+				payload := json.Unmarshal([]byte(ReviewsJson(concaturl)), &receiver.Yelp)
+				if payload != nil {
+					log.Error.Println("Yelp payload error", payload)
+				}
+				yelpReview := jsonYelp.JSONtoMapYelp(receiver.Yelp)
 				defer receiver.WG.Done()
 				receiver.YelpChanMap <- yelpReview
-			}(yelpReview)
+			}(loopcount)
 		}
 		receiver.WG.Wait()
 

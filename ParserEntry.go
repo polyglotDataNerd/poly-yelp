@@ -6,6 +6,7 @@ import (
 	goutils "github.com/polyglotDataNerd/poly-Go-utils/utils"
 	"github.com/polyglotDataNerd/poly-yelp/parser"
 	uuid "github.com/satori/go.uuid"
+	"io/ioutil"
 	"math"
 	"runtime"
 	"strings"
@@ -55,11 +56,25 @@ func main() {
 				v, "\n")
 			stringBuilder.WriteString(stringFormat)
 		}
-		/* "2006-01-02" is the standard time format for go lang YYYY-MM-DD*/
-		objectKey := key + "/reviews/" + time.Now().Format("2006-01-02") + "/" + uuid.NewV4().String() + "/" + time.Now().Format("2006-01-02") + "-" + uuid.NewV4().String() + ".gz"
-		/*writes payload to s3*/
-		goaws.S3Obj{Bucket: s3Bucket, Key: objectKey}.S3WriteGzip(stringBuilder.String(), goaws.SessionGenerator())
 	}
+	/* "2006-01-02" is the standard time format for go lang YYYY-MM-DD*/
+	objectKey := key + "/reviews/" + time.Now().Format("2006-01-02") + "/" + uuid.NewV4().String() + "/" + time.Now().Format("2006-01-02") + "-" + uuid.NewV4().String() + ".gz"
+	/*writes payload to s3*/
+	goaws.S3Obj{Bucket: s3Bucket, Key: objectKey}.S3WriteGzip(stringBuilder.String(), goaws.SessionGenerator())
+
+	/*reading log file as body*/
+	file, _ := ioutil.ReadFile("/var/tmp/utils.log")
+	output := string(file)
+
+	/*for cloudwatch*/
+	cloudwatch := goaws.CloudWatch{
+		LogGroup:  "yelp-parser",
+		Retention: 1,
+	}
+	logs := cloudwatch.CloudWatchPut()
+	defer logs.Close()
+	logs.Log(time.Now(), output)
+
 	/*stop watch end*/
 	endTimme := math.Round(time.Since(startTime).Seconds())
 	goutils.Info.Println("Yelp Scraper Finish Time", endTimme, "seconds")
