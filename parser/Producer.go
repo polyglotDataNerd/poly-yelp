@@ -22,14 +22,16 @@ func (receiver *ObjMapper) Producer(bucket string, urls string, loadType string)
 	defer close(receiver.YelpChanMap)
 	/* Scans all yelp URLS in object puts into a channel via go routines */
 
-	if loadType == "file" {
+	if loadType == "files" {
 		/* args passes an s3 object that has many urls */
 		go scanner.ProcessDir(receiver.Urls, bucket, urls, "flat")
 		log.Info.Println("start line scan")
 	} else if loadType == "url" {
 		/* args passes a single url */
-		receiver.Urls <- urls
-		close(receiver.Urls)
+		go func(url string) {
+			defer close(receiver.Urls)
+			receiver.Urls <- urls
+		}(urls)
 	}
 
 	/* Yelp URLS channel coming from an s3 bucket list of YELP urls */
@@ -47,6 +49,7 @@ func (receiver *ObjMapper) Producer(bucket string, urls string, loadType string)
 
 			/*adds a +20 in the loop URL to get the last reviews if the loop count doesn't end in an even number*/
 			loopcount, _ := strconv.Atoi(fmt.Sprintf("%v", l["aggregateRating"].(map[string]interface{})["reviewCount"]))
+			log.Info.Println("Number of reviews", loopcount)
 			for i := 20; i <= loopcount; i = i + 20 {
 
 				/*Itoa turns int to primitive string and concats the pagenumer for the base url*/
@@ -60,6 +63,7 @@ func (receiver *ObjMapper) Producer(bucket string, urls string, loadType string)
 				/* runs the parser in parallel using Waitgroup on the go routines passing it to another channel */
 				receiver.WG.Add(1)
 				go func(loop int) {
+					defer receiver.WG.Done()
 					log.Info.Println("url", concaturl)
 					payloadString := ReviewsJson(concaturl)
 
@@ -70,7 +74,6 @@ func (receiver *ObjMapper) Producer(bucket string, urls string, loadType string)
 							log.Error.Println("Yelp payload error", payload)
 						}
 						yelpReview := jsonYelp.JSONtoMapYelp(receiver.Yelp)
-						defer receiver.WG.Done()
 						receiver.YelpChanMap <- yelpReview
 					}
 				}(loopcount)

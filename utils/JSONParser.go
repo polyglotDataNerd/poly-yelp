@@ -70,5 +70,11 @@ func JSONtoMapYelp(data map[string]interface{}) map[string]string {
 	}
 	endTimme := math.Round(float64(time.Since(startTime).Nanoseconds()) * 1.0e-4)
 	log.Info.Println("JSON to Map processing time", endTimme, "ms")
-	return transform
+
+	if len(transform) > 0 {
+		return transform
+	} else {
+		log.Error.Println("payload is empty")
+		return nil
+	}
 }
