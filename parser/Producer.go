@@ -20,10 +20,12 @@ type ObjMapper struct {
 func (receiver *ObjMapper) Producer(bucket string, urls string, loadType string) {
 	/* sender */
 	defer close(receiver.YelpChanMap)
-	/* Scans all yelp URLS in object puts into a channel via go routines */
 
 	if loadType == "files" {
-		/* args passes an s3 object that has many urls */
+		/*
+			args passes an s3 object that has many urls
+			Scans all yelp URLS in object puts into a channel via go routines
+		*/
 		go scanner.ProcessDir(receiver.Urls, bucket, urls, "flat")
 		log.Info.Println("start line scan")
 	} else if loadType == "url" {
@@ -62,11 +64,10 @@ func (receiver *ObjMapper) Producer(bucket string, urls string, loadType string)
 
 				/* runs the parser in parallel using Waitgroup on the go routines passing it to another channel */
 				receiver.WG.Add(1)
-				go func(loop int) {
+				go func(url string) {
 					defer receiver.WG.Done()
 					log.Info.Println("url", concaturl)
 					payloadString := ReviewsJson(concaturl)
-
 					/* checks to see if string is empty */
 					if len(payloadString) > 0 {
 						payload := json.Unmarshal([]byte(payloadString), &receiver.Yelp)
@@ -76,7 +77,7 @@ func (receiver *ObjMapper) Producer(bucket string, urls string, loadType string)
 						yelpReview := jsonYelp.JSONtoMapYelp(receiver.Yelp)
 						receiver.YelpChanMap <- yelpReview
 					}
-				}(loopcount)
+				}(concaturl)
 			}
 			receiver.WG.Wait()
 		} else {
