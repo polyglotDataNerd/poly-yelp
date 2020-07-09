@@ -7,6 +7,7 @@ import (
 	"github.com/polyglotDataNerd/poly-yelp/parser"
 	uuid "github.com/satori/go.uuid"
 	"math"
+	"os"
 	"runtime"
 	"strings"
 	"sync"
@@ -28,9 +29,11 @@ func main() {
 
 	//var stringBuilder strings.Builder
 	var WG sync.WaitGroup
-	s3Bucket := "poly-testing"
-	key := "yelp"
-	sourceUrls := "yelp/urls"
+	inS3Bucket := os.Args[1]
+	outS3Bucket := os.Args[2]
+	outputKey := os.Args[3]
+	loadType := os.Args[4]
+	sourceUrls := os.Args[5]
 	yelpUrls := make(chan string)
 	yelpChan := make(chan map[string]string)
 	baseMap := make(map[string]interface{})
@@ -41,7 +44,7 @@ func main() {
 		Urls:        yelpUrls,
 		YelpChanMap: yelpChan}
 
-	go producer.Producer(s3Bucket, sourceUrls)
+	go producer.Producer(inS3Bucket, sourceUrls, loadType)
 
 	for yMap := range yelpChan {
 		for k, v := range yMap {
@@ -57,9 +60,9 @@ func main() {
 		}
 	}
 	/* "2006-01-02" is the standard time format for go lang YYYY-MM-DD*/
-	objectKey := key + "/reviews/" + time.Now().Format("2006-01-02") + "/" + uuid.NewV4().String() + "/" + time.Now().Format("2006-01-02") + "-" + uuid.NewV4().String() + ".gz"
+	objectKey := outputKey + "/reviews/" + time.Now().Format("2006-01-02") + "/" + uuid.NewV4().String() + "/" + time.Now().Format("2006-01-02") + "-" + uuid.NewV4().String() + ".gz"
 	/*writes payload to s3*/
-	goaws.S3Obj{Bucket: s3Bucket, Key: objectKey}.S3WriteGzip(stringBuilder.String(), goaws.SessionGenerator())
+	goaws.S3Obj{Bucket: outS3Bucket, Key: objectKey}.S3WriteGzip(stringBuilder.String(), goaws.SessionGenerator())
 
 	/* cloudwatch: reading log file as body
 	file, _ := ioutil.ReadFile("/var/tmp/utils.log")

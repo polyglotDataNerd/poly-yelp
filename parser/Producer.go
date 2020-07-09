@@ -17,12 +17,20 @@ type ObjMapper struct {
 	YelpChanMap chan map[string]string
 }
 
-func (receiver *ObjMapper) Producer(bucket string, key string) {
+func (receiver *ObjMapper) Producer(bucket string, urls string, loadType string) {
 	/* sender */
 	defer close(receiver.YelpChanMap)
 	/* Scans all yelp URLS in object puts into a channel via go routines */
-	go scanner.ProcessDir(receiver.Urls, bucket, key, "flat")
-	log.Info.Println("start line scan")
+
+	if loadType == "file" {
+		/* args passes an s3 object that has many urls */
+		go scanner.ProcessDir(receiver.Urls, bucket, urls, "flat")
+		log.Info.Println("start line scan")
+	} else if loadType == "url" {
+		/* args passes a single url */
+		receiver.Urls <- urls
+		close(receiver.Urls)
+	}
 
 	/* Yelp URLS channel coming from an s3 bucket list of YELP urls */
 	for url := range receiver.Urls {
