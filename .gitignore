@@ -126,3 +126,5 @@ fabric.properties
 *.html
 *.config
 *infrastructure/*
+*.xlsx*
+

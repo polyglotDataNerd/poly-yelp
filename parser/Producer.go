@@ -8,6 +8,7 @@ import (
 	jsonYelp "github.com/polyglotDataNerd/poly-yelp/utils"
 	"strconv"
 	"sync"
+	"time"
 )
 
 type ObjMapper struct {
@@ -64,6 +65,10 @@ func (receiver *ObjMapper) Producer(bucket string, urls string, loadType string)
 
 				/* runs the parser in parallel using Waitgroup on the go routines passing it to another channel */
 				receiver.WG.Add(1)
+				/* controls throttling, API calls are to fast when ran in parallel and it's causing HTTP call to fail,
+				works fine when number of parallel calls are below 100 */
+				time.Sleep(1 * time.Millisecond)
+
 				go func(url string) {
 					defer receiver.WG.Done()
 					log.Info.Println("url", concaturl)

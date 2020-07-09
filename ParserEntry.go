@@ -45,7 +45,6 @@ func main() {
 		YelpChanMap: yelpChan}
 
 	go producer.Producer(inS3Bucket, sourceUrls, loadType)
-
 	for yMap := range yelpChan {
 		for k, v := range yMap {
 			keyArray := strings.Split(k, ":")
