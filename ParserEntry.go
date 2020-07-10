@@ -59,7 +59,7 @@ func main() {
 		}
 	}
 	/* "2006-01-02" is the standard time format for go lang YYYY-MM-DD*/
-	objectKey := outputKey + "/reviews/" + time.Now().Format("2006-01-02") + "/" + uuid.NewV4().String() + "/" + time.Now().Format("2006-01-02") + "-" + uuid.NewV4().String() + ".gz"
+	objectKey := outputKey + "/reviews/" + time.Now().Format("2006-01-02") + "/" + time.Now().Format("2006-01-02") + "-" + uuid.NewV4().String() + ".gz"
 	/*writes payload to s3*/
 	goaws.S3Obj{Bucket: outS3Bucket, Key: objectKey}.S3WriteGzip(stringBuilder.String(), goaws.SessionGenerator())
 
