@@ -93,7 +93,7 @@ func JSONtoMapYelpV2(data map[string]interface{}) map[string]string {
 	/* yelp may or may not have business address */
 	var businessAddress string
 
-	if data["bizDetailsPageProps"].(map[string]interface{})["bizContactInfoProps"].(map[string]interface{})["businessAddress"] == "no value" {
+	if data["bizDetailsPageProps"].(map[string]interface{})["bizContactInfoProps"].(map[string]interface{})["businessAddress"] == nil {
 		businessAddress = "no address"
 	} else {
 		businessAddress = data["bizDetailsPageProps"].(map[string]interface{})["bizContactInfoProps"].(map[string]interface{})["businessAddress"].(string)
