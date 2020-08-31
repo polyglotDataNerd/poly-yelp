@@ -3,7 +3,7 @@ package utils
 import (
 	"fmt"
 	"github.com/k3a/html2text"
-	log "github.com/polyglotDataNerd/poly-Go-utils/utils"
+	"github.com/polyglotDataNerd/poly-Go-utils/utils"
 	"math"
 	"sort"
 	"strings"
@@ -20,8 +20,8 @@ func JSONtoMapYelpV1(data map[string]interface{}) map[string]string {
 	transform := make(map[string]string)
 	var keybuilder strings.Builder
 	/*get type of reviews payload
-	log.Println("var kind:", reflect.TypeOf(data["review"]).Kind())
-	log.Println("var type:", reflect.TypeOf(data["review"]))*/
+	utils.Println("var kind:", reflect.TypeOf(data["review"]).Kind())
+	utils.Println("var type:", reflect.TypeOf(data["review"]))*/
 	rewiews := data["review"]
 
 	/*gets the location and address to of store to append to key*/
@@ -73,13 +73,13 @@ func JSONtoMapYelpV1(data map[string]interface{}) map[string]string {
 			"\n", " "), "\"", "")
 		keybuilder.Reset()
 		endTimme := math.Round(float64(time.Since(startTime).Nanoseconds()) * 1.0e-4)
-		log.Info.Println("JSON to Map processing time", endTimme, "ms")
+		utils.Info.Println("JSON to Map processing time", endTimme, "ms")
 
 	}
 	if len(transform) > 0 {
 		return transform
 	} else {
-		log.Error.Println("payload is empty")
+		utils.Error.Println("payload is empty")
 		return nil
 	}
 
@@ -90,9 +90,17 @@ func JSONtoMapYelpV2(data map[string]interface{}) map[string]string {
 	startTime := time.Now()
 	transform := make(map[string]string)
 	var keybuilder strings.Builder
+	/* yelp may or may not have business address */
+	var businessAddress string
+
+	if data["bizDetailsPageProps"].(map[string]interface{})["bizContactInfoProps"].(map[string]interface{})["businessAddress"] == "no value" {
+		businessAddress = "no address"
+	} else {
+		businessAddress = data["bizDetailsPageProps"].(map[string]interface{})["bizContactInfoProps"].(map[string]interface{})["businessAddress"].(string)
+	}
 
 	/* html2text.HTML2Text converts all encoded characters eg. &amp; into plain text */
-	ak := fmt.Sprintf("%s:%s:", html2text.HTML2Text(data["bizDetailsPageProps"].(map[string]interface{})["bizContactInfoProps"].(map[string]interface{})["businessAddress"].(string)), html2text.HTML2Text(data["bizDetailsPageProps"].(map[string]interface{})["businessName"].(string)))
+	ak := fmt.Sprintf("%s:%s:", html2text.HTML2Text(businessAddress), html2text.HTML2Text(data["bizDetailsPageProps"].(map[string]interface{})["businessName"].(string)))
 
 	for _, z := range
 		data["bizDetailsPageProps"].(map[string]interface{})["reviewFeedQueryProps"].(map[string]interface{})["reviews"].([]interface{}) {
@@ -113,12 +121,12 @@ func JSONtoMapYelpV2(data map[string]interface{}) map[string]string {
 
 		keybuilder.Reset()
 		endTimme := math.Round(float64(time.Since(startTime).Nanoseconds()) * 1.0e-4)
-		log.Info.Println("JSON to Map processing time", endTimme, "ms")
+		utils.Info.Println("JSON to Map processing time", endTimme, "ms")
 	}
 	if len(transform) > 0 {
 		return transform
 	} else {
-		log.Error.Println("payload is empty")
+		utils.Error.Println("payload is empty")
 		return nil
 	}
 }
