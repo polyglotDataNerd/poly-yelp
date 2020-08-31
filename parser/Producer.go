@@ -41,7 +41,7 @@ func (receiver *ObjMapper) Producer(bucket string, urls string, loadType string)
 	for url := range receiver.Urls {
 		log.Info.Println("main url", url)
 		l := make(map[string]interface{})
-		count := ReviewsJson(url)
+		count := ReviewsJsonV1(url)
 
 		/* checks to see if string is empty */
 		if len(count) > 0 {
@@ -72,14 +72,14 @@ func (receiver *ObjMapper) Producer(bucket string, urls string, loadType string)
 				go func(url string) {
 					defer receiver.WG.Done()
 					log.Info.Println("url", concaturl)
-					payloadString := ReviewsJson(concaturl)
+					payloadString := ReviewsJsonV2(concaturl)
 					/* checks to see if string is empty */
 					if len(payloadString) > 0 {
-						payload := json.Unmarshal([]byte(payloadString), &receiver.Yelp)
-						if payload != nil {
-							log.Error.Println("Yelp payload error", payload)
+						payloaderr := json.Unmarshal([]byte(payloadString), &receiver.Yelp)
+						if payloaderr != nil {
+							log.Error.Println("Yelp payload error", payloaderr)
 						}
-						yelpReview := jsonYelp.JSONtoMapYelp(receiver.Yelp)
+						yelpReview := jsonYelp.JSONtoMapYelpV2(receiver.Yelp)
 						receiver.YelpChanMap <- yelpReview
 					}
 				}(concaturl)

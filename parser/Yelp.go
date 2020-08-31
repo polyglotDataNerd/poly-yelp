@@ -66,7 +66,12 @@ func PayloadRequest(url string) http.Response {
 
 }
 
-func ReviewsJson(url string) (jsonpayload string) {
+/*
+@Deprecated
+yelp changed it's source so review date is masked to "1970-01-19" when getting it from type application/ld+json, still works for all
+functionality except for date of review
+ */
+func ReviewsJsonV1(url string) (jsonpayload string) {
 	payload := PayloadRequest(url)
 	defer payload.Body.Close()
 
@@ -93,6 +98,48 @@ func ReviewsJson(url string) (jsonpayload string) {
 							/*will only search and filter the text tokens for anything that has text review*/
 							if strings.Contains(jsonpayload, "review") {
 								return jsonpayload
+							}
+							break
+						}
+					}
+				}
+			}
+
+		}
+	}
+}
+
+/*
+yelp payload will now source type application/json and will look for a JSON called reviewFeedQueryProps
+	review == comments
+*/
+func ReviewsJsonV2(url string) (jsonpayload string) {
+	payload := PayloadRequest(url)
+	defer payload.Body.Close()
+
+	l := html.NewTokenizer(payload.Body)
+	for {
+		tt := l.Next()
+		switch {
+		case tt == html.ErrorToken:
+			return
+		case tt == html.StartTagToken:
+			token := l.Token()
+
+			/*script tag, this condition finds and iterates the script tag
+			to parse reviews from script tag in JSON format
+			*/
+			if "script" == token.Data {
+				for _, a := range token.Attr {
+					/*once within the node we filter for anytype of json type in the key/pair value*/
+					if a.Val == "application/json" {
+						tt := l.Next()
+						/*will get the json text in the text token of the html source.*/
+						if tt == html.TextToken {
+							jsonpayload := strings.TrimSpace(l.Token().Data)
+							/*will only search and filter the text tokens for anything that has text review*/
+							if strings.Contains(jsonpayload, "reviewFeedQueryProps") {
+								return strings.ReplaceAll(strings.ReplaceAll(jsonpayload,"<!--",""), "-->","")
 							}
 							break
 						}

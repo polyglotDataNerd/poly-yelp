@@ -48,12 +48,13 @@ func main() {
 	for yMap := range yelpChan {
 		for k, v := range yMap {
 			keyArray := strings.Split(k, ":")
-			stringFormat := fmt.Sprintf("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"%s",
+			stringFormat := fmt.Sprintf("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"%s",
 				strings.ReplaceAll(keyArray[0], "\n", " "),
 				strings.ReplaceAll(keyArray[1], "\n", " "),
 				strings.ReplaceAll(keyArray[2], "\n", " "),
 				strings.ReplaceAll(keyArray[3], "\n", " "),
 				strings.ReplaceAll(keyArray[4], "\n", " "),
+				strings.ReplaceAll(keyArray[5], "\n", " "),
 				v, "\n")
 			stringBuilder.WriteString(stringFormat)
 		}

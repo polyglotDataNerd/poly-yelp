@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"github.com/k3a/html2text"
 	log "github.com/polyglotDataNerd/poly-Go-utils/utils"
 	"math"
 	"sort"
@@ -9,7 +10,10 @@ import (
 	"time"
 )
 
-func JSONtoMapYelp(data map[string]interface{}) map[string]string {
+/*
+@Deprecated use JSONtoMapYelpV2
+*/
+func JSONtoMapYelpV1(data map[string]interface{}) map[string]string {
 
 	/*stopwatch start*/
 	startTime := time.Now()
@@ -32,7 +36,8 @@ func JSONtoMapYelp(data map[string]interface{}) map[string]string {
 		var sortedkeys []string
 
 		/*loops through the keys to append to string array for sort order*/
-		for k := range v.(map[string]interface{}) {
+		for k, _ := range v.(map[string]interface{}) {
+			//println(reflect.TypeOf(k).Kind())
 			sortedkeys = append(sortedkeys, k)
 		}
 		/*needs to sort keys in the outer Map since JSON does not do any sorting to build our output Map key*/
@@ -67,10 +72,49 @@ func JSONtoMapYelp(data map[string]interface{}) map[string]string {
 			strings.TrimSpace(fmt.Sprintf("%v", innerMap["description"])),
 			"\n", " "), "\"", "")
 		keybuilder.Reset()
-	}
-	endTimme := math.Round(float64(time.Since(startTime).Nanoseconds()) * 1.0e-4)
-	log.Info.Println("JSON to Map processing time", endTimme, "ms")
+		endTimme := math.Round(float64(time.Since(startTime).Nanoseconds()) * 1.0e-4)
+		log.Info.Println("JSON to Map processing time", endTimme, "ms")
 
+	}
+	if len(transform) > 0 {
+		return transform
+	} else {
+		log.Error.Println("payload is empty")
+		return nil
+	}
+
+}
+
+func JSONtoMapYelpV2(data map[string]interface{}) map[string]string {
+	/*stopwatch start*/
+	startTime := time.Now()
+	transform := make(map[string]string)
+	var keybuilder strings.Builder
+
+	/* html2text.HTML2Text converts all encoded characters eg. &amp; into plain text */
+	ak := fmt.Sprintf("%s:%s:", html2text.HTML2Text(data["bizDetailsPageProps"].(map[string]interface{})["bizContactInfoProps"].(map[string]interface{})["businessAddress"].(string)), html2text.HTML2Text(data["bizDetailsPageProps"].(map[string]interface{})["businessName"].(string)))
+
+	for _, z := range
+		data["bizDetailsPageProps"].(map[string]interface{})["reviewFeedQueryProps"].(map[string]interface{})["reviews"].([]interface{}) {
+		keybuilder.WriteString(ak)
+		//reviewDate, _ := time.Parse("2006-01-02", z.(map[string]interface{})["localizedDate"].(string))
+
+		keyreviews := fmt.Sprintf("%s:%s:%s:%d:",
+			z.(map[string]interface{})["user"].(map[string]interface{})["markupDisplayName"].(string),
+			z.(map[string]interface{})["user"].(map[string]interface{})["displayLocation"].(string),
+			z.(map[string]interface{})["localizedDate"].(string),
+			int(z.(map[string]interface{})["rating"].(float64)))
+		keybuilder.WriteString(keyreviews)
+
+		/* value of key/pair, this is the yelp review */
+		transform[keybuilder.String()] = strings.ReplaceAll(strings.ReplaceAll(
+			strings.TrimSpace(fmt.Sprintf("%v", html2text.HTML2Text(z.(map[string]interface{})["comment"].(map[string]interface{})["text"].(string)))),
+			"\n", " "), "\"", "")
+
+		keybuilder.Reset()
+		endTimme := math.Round(float64(time.Since(startTime).Nanoseconds()) * 1.0e-4)
+		log.Info.Println("JSON to Map processing time", endTimme, "ms")
+	}
 	if len(transform) > 0 {
 		return transform
 	} else {

@@ -6,6 +6,7 @@ require (
 	github.com/aws/aws-sdk-go v1.33.3 // indirect
 	github.com/deckarep/golang-set v1.7.1
 	github.com/gocql/gocql v0.0.0-20200624222514-34081eda590e // indirect
+	github.com/k3a/html2text v0.0.0-20191003111652-62431c4a3ba5
 	github.com/lib/pq v1.7.0 // indirect
 	github.com/polyglotDataNerd/poly-Go-utils v0.0.0-20200707192657-dcf9add1be40
 	github.com/satori/go.uuid v1.2.0
