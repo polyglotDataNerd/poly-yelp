@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"testing"
 	"time"
 )
 
@@ -18,6 +19,11 @@ import (
  This is the main entry point of the yelp goscraper that uses the goroutine/channel design pattern to produce a review dataset by
  iterating through all review URL's concurrently parsing the HTML to get a map of reviews back.
 */
+
+var _ = func() bool {
+	testing.Init()
+	return true
+}()
 
 func main() {
 	/*go routine that runs concurrently*/

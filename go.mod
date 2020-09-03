@@ -3,7 +3,7 @@ module github.com/polyglotDataNerd/poly-yelp
 go 1.14
 
 require (
-	github.com/aws/aws-sdk-go v1.34.13 // indirect
+	github.com/aws/aws-sdk-go v1.34.16 // indirect
 	github.com/deckarep/golang-set v1.7.1
 	github.com/gocql/gocql v0.0.0-20200624222514-34081eda590e // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20200217142428-fce0ec30dd00 // indirect
@@ -15,5 +15,6 @@ require (
 	github.com/stretchr/testify v1.6.1 // indirect
 	golang.org/x/net v0.0.0-20200822124328-c89045814202
 	golang.org/x/text v0.3.3 // indirect
+	gopkg.in/check.v1 v1.0.0-20200902074654-038fdea0a05b // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 )
